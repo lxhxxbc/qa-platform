@@ -16,6 +16,7 @@ import app.models  # noqa: F401 — 不直接使用但必须导入
 from app.routers import answers
 from app.routers import auth
 from app.routers import questions
+from app.routers import tags
 
 
 # ---- Lifespan 事件 ----
@@ -54,6 +55,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(questions.router)
 app.include_router(answers.router)
+app.include_router(tags.router)
 
 
 @app.get("/")
