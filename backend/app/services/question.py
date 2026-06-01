@@ -131,8 +131,18 @@ async def create_question(
     )
     db.add(question)
     await db.commit()
-    await db.refresh(question)
-    return question
+
+    # 重新加载问题，预加载所有关联数据（避免 session 关闭后 lazy load 报错）
+    result = await db.execute(
+        select(Question)
+        .options(
+            selectinload(Question.author),
+            selectinload(Question.tags),
+            selectinload(Question.answers).selectinload(Answer.author),
+        )
+        .where(Question.id == question.id)
+    )
+    return result.unique().scalar_one()
 
 
 async def update_question(
@@ -145,8 +155,18 @@ async def update_question(
         if value is not None:
             setattr(question, key, value)
     await db.commit()
-    await db.refresh(question)
-    return question
+
+    # 重新加载问题，预加载所有关联数据
+    result = await db.execute(
+        select(Question)
+        .options(
+            selectinload(Question.author),
+            selectinload(Question.tags),
+            selectinload(Question.answers).selectinload(Answer.author),
+        )
+        .where(Question.id == question.id)
+    )
+    return result.unique().scalar_one()
 
 
 async def delete_question(db: AsyncSession, question: Question) -> None:

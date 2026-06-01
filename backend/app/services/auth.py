@@ -7,16 +7,10 @@ JWT（JSON Web Token）是无状态的 — 服务端不需要存 session，Token
 """
 from datetime import datetime, timedelta, timezone
 
+import bcrypt  # 直接使用 bcrypt 库进行密码哈希
 from jose import JWTError, jwt  # JWT 编码/解码库
-from passlib.context import CryptContext  # 密码哈希库
 
 from app.config import settings
-
-# ---- 密码哈希配置 ----
-# CryptContext: passlib 的核心类，管理密码哈希方案
-# schemes=["bcrypt"]: 使用 bcrypt 算法（业界标准，抗暴力破解）
-# deprecated="auto": 自动弃用过时的哈希方案
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def hash_password(password: str) -> str:
@@ -26,9 +20,11 @@ def hash_password(password: str) -> str:
     bcrypt 哈希的特点：
     - 相同的密码每次哈希结果不同（因为嵌入随机盐值 salt）
     - 不可逆 — 无法从哈希值还原出原始密码
-    - 验证时用 pwd_context.verify(明文, 哈希值) 对比
+    - 验证时用 verify_password(明文, 哈希值) 对比
     """
-    return pwd_context.hash(password)
+    # bcrypt.hashpw 需要 bytes，返回 bytes
+    # gensalt() 生成随机盐值
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -36,7 +32,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     验证明文密码是否与哈希值匹配。
     返回 True 表示密码正确，False 表示密码错误。
     """
-    return pwd_context.verify(plain_password, hashed_password)
+    return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
 
 
 # ---- JWT 令牌 ----

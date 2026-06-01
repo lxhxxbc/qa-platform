@@ -36,10 +36,9 @@ class Question(Base):
     # 一个问题属于一个作者
     author: Mapped["User"] = relationship("User", back_populates="questions")
     # 一个问题有多个回答
-    # lazy="dynamic": 不立即加载，返回一个可查询的对象（避免 N+1 问题）
+    # 使用默认 lazy 模式（select），配合 selectinload 预加载避免 N+1 问题
     answers: Mapped[list["Answer"]] = relationship(
         "Answer", back_populates="question", cascade="all, delete-orphan",
-        lazy="dynamic"
     )
     # 多对多标签
     tags: Mapped[list["Tag"]] = relationship(

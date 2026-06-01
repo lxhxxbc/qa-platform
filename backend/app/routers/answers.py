@@ -34,7 +34,8 @@ async def create_answer_route(
     current_user: User = Depends(get_current_user),
 ):
     """提交回答"""
-    return await create_answer(db, question_id, body.body, current_user.id)
+    answer = await create_answer(db, question_id, body.body, current_user.id)
+    return AnswerResponse.model_validate(answer)
 
 
 @router.put("/api/answers/{answer_id}", response_model=AnswerResponse)
@@ -50,7 +51,8 @@ async def update_answer_route(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="回答不存在")
     if answer.author_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="只能编辑自己的回答")
-    return await update_answer(db, answer, body.body)
+    answer = await update_answer(db, answer, body.body)
+    return AnswerResponse.model_validate(answer)
 
 
 @router.delete("/api/answers/{answer_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -86,7 +88,8 @@ async def accept_answer_route(
     if question.author_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="只有提问者可以采纳回答")
 
-    return await accept_answer(db, answer, question)
+    answer = await accept_answer(db, answer, question)
+    return AnswerResponse.model_validate(answer)
 
 
 # ---- 投票 ----

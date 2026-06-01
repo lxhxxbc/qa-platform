@@ -47,8 +47,11 @@ async def get_question(
     # 增加浏览量
     question.view_count += 1
     await db.commit()
+    # 刷新 ORM 对象获取最新的 updated_at，确保所有属性都已加载
+    await db.refresh(question)
 
-    return question
+    # 显式转换为 Pydantic 模型，在 session 关闭前完成序列化
+    return QuestionDetail.model_validate(question)
 
 
 @router.post("", response_model=QuestionDetail, status_code=status.HTTP_201_CREATED)
@@ -58,7 +61,9 @@ async def create_question_route(
     current_user: User = Depends(get_current_user),  # 需要登录
 ):
     """发布新问题"""
-    return await create_question(db, body, current_user.id)
+    question = await create_question(db, body, current_user.id)
+    # 显式转换为 Pydantic，避免 session 关闭后序列化时 MissingGreenlet 错误
+    return QuestionDetail.model_validate(question)
 
 
 @router.put("/{question_id}", response_model=QuestionDetail)
@@ -75,7 +80,8 @@ async def update_question_route(
     # 权限检查：只有作者能编辑
     if question.author_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="只能编辑自己的问题")
-    return await update_question(db, question, body.model_dump(exclude_unset=True))
+    question = await update_question(db, question, body.model_dump(exclude_unset=True))
+    return QuestionDetail.model_validate(question)
 
 
 @router.delete("/{question_id}", status_code=status.HTTP_204_NO_CONTENT)
