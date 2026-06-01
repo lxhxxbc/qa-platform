@@ -1,39 +1,51 @@
 """
 FastAPI 应用入口
 ----------------
-FastAPI 是一个现代、高性能的 Python Web 框架。
-核心概念：
-- app = FastAPI(): 创建应用实例
-- @app.get("/path"): 装饰器定义 GET 路由
-- uvicorn.run(): ASGI 服务器运行应用
+FastAPI 提供 lifespan 事件机制，让我们在应用启动/关闭时执行代码。
+这里在启动时自动创建数据库表（仅开发环境方便使用，生产环境应该用 Alembic 迁移）。
 """
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
-# CORSMiddleware: 处理跨域请求 — 前后端分离时，前端(5173端口)请求后端(8000端口)算跨域
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
+from app.database import Base, engine
 
-# 创建 FastAPI 应用实例
-# title: API 文档标题
-# version: 版本号
-app = FastAPI(title=settings.app_name, version="0.1.0")
+
+# ---- Lifespan 事件 ----
+# asynccontextmanager 装饰器：将一个异步生成器函数转为上下文管理器
+# 这个函数在 FastAPI 启动时执行（yield 之前）和关闭时执行（yield 之后）
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 启动时：创建所有数据库表（如果表不存在的话）
+    # Base.metadata.create_all 会扫描所有继承 Base 的模型，自动建表
+    # 注意：生产环境应使用 Alembic 迁移，这里仅图方便
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    print("数据库表已就绪")
+    yield  # 应用运行期间在此暂停
+    # 关闭时：释放数据库引擎资源
+    await engine.dispose()
+
+
+# ---- 创建应用 ----
+app = FastAPI(
+    title=settings.app_name,
+    version="0.1.0",
+    lifespan=lifespan,  # 注册 lifespan 事件
+)
 
 # ---- CORS 配置 ----
-# 前后端分离时，浏览器出于安全考虑会阻止跨域请求。
-# CORS（跨域资源共享）告诉浏览器"这些来源的请求是允许的"。
 app.add_middleware(
     CORSMiddleware,
-    # allow_origins: 允许哪些前端地址访问后端
-    # 开发时 React 开发服务器在 localhost:5173
-    # 上线后替换为实际域名
     allow_origins=["http://localhost:5173"],
-    allow_credentials=True,       # 允许携带 Cookie
-    allow_methods=["*"],          # 允许所有 HTTP 方法（GET, POST, PUT, DELETE...）
-    allow_headers=["*"],          # 允许所有请求头
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
-# ---- 根路由 ----
 @app.get("/")
 async def root():
     """API 根路径 — 用于健康检查"""
