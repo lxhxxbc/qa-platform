@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     app_name: str = "QA Platform API"
     debug: bool = True
 
+    # 端口配置（Railway 通过 PORT 环境变量指定）
+    port: int = 8000
+
     # 告诉 Pydantic 从 .env 文件读取环境变量
     # env_file = ".env" 表示自动寻找并读取同级目录的 .env 文件
     model_config = {"env_file": ".env", "extra": "ignore"}
