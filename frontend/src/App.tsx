@@ -12,33 +12,11 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Layout from "./components/Layout";
-
-// 页面组件 — 稍后创建，先创建占位页面组件避免编译报错
-// 使用内联的临时占位组件
-function HomePage() {
-  return (
-    <div className="text-center py-16">
-      <h1 className="text-2xl font-bold text-gray-700">QA 问答社区</h1>
-      <p className="text-gray-400 mt-2">页面组件开发中...</p>
-    </div>
-  );
-}
-
-function QuestionDetailPage() {
-  return <div className="text-center py-16 text-gray-400">问题详情页开发中...</div>;
-}
-
-function AskQuestionPage() {
-  return <div className="text-center py-16 text-gray-400">发布问题页开发中...</div>;
-}
-
-function LoginPage() {
-  return <div className="text-center py-16 text-gray-400">登录页开发中...</div>;
-}
-
-function RegisterPage() {
-  return <div className="text-center py-16 text-gray-400">注册页开发中...</div>;
-}
+import HomePage from "./pages/HomePage";
+import QuestionDetailPage from "./pages/QuestionDetailPage";
+import AskQuestionPage from "./pages/AskQuestionPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 
 // ---- 路由定义 ----
 // createBrowserRouter: 创建路由实例（React Router v6.4+ 的新 API）
