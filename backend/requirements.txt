@@ -1,0 +1,23 @@
+# Web 框架 — FastAPI 是目前最快的 Python Web 框架之一，支持异步
+fastapi==0.115.6
+# ASGI 服务器 — 用于生产环境运行 FastAPI（替代开发环境的 uvicorn）
+uvicorn[standard]==0.34.0
+
+# ORM — SQLAlchemy 是 Python 最流行的数据库工具库
+# 2.0 版本支持原生异步操作（async/await），与 FastAPI 的异步架构配合
+sqlalchemy[asyncio]==2.0.36
+# 异步 PostgreSQL 驱动 — SQLAlchemy 通过它连接 PostgreSQL
+asyncpg==0.30.0
+# PostgreSQL 同步驱动 — Alembic 迁移工具需要用到
+psycopg2-binary==2.9.10
+
+# 数据库迁移 — 类似 Git 管理代码，Alembic 管理数据库表结构的版本
+alembic==1.14.0
+
+# JWT 认证 — 用于生成和验证 JSON Web Token（无状态登录）
+python-jose[cryptography]==3.3.0
+# 密码哈希 — 使用 bcrypt 算法对用户密码进行加密存储（不可逆）
+passlib[bcrypt]==1.7.4
+
+# 数据验证 — Pydantic 是 FastAPI 的核心依赖，用于请求/响应数据的类型校验
+pydantic[email]==2.10.3
