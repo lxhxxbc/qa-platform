@@ -11,6 +11,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import Base, engine
+# 导入所有模型，确保 SQLAlchemy 在 create_all 时能发现它们
+import app.models  # noqa: F401 — 不直接使用但必须导入
 
 
 # ---- Lifespan 事件 ----
