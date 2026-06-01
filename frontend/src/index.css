@@ -1,0 +1,6 @@
+/*
+ * Tailwind CSS 入口文件
+ * @import "tailwindcss" 导入 Tailwind 的所有基础样式和工具类
+ * 之后在组件中直接使用 Tailwind 的 class（如 className="text-lg font-bold"）
+ */
+@import "tailwindcss";
