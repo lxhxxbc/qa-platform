@@ -3,6 +3,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
+from app.schemas.answer import AnswerResponse
 from app.schemas.auth import UserResponse
 
 
@@ -62,6 +63,7 @@ class QuestionDetail(BaseModel):
     tags: list[TagResponse]
     vote_count: int
     view_count: int
+    answers: list[AnswerResponse] = []  # 回答列表
     created_at: datetime
     updated_at: datetime
 

@@ -13,6 +13,7 @@ from app.config import settings
 from app.database import Base, engine
 # 导入所有模型，确保 SQLAlchemy 在 create_all 时能发现它们
 import app.models  # noqa: F401 — 不直接使用但必须导入
+from app.routers import answers
 from app.routers import auth
 from app.routers import questions
 
@@ -49,9 +50,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 注册路由 — include_router 把 auth 模块的路由挂载到主应用
+# 注册路由 — include_router 把各个模块的路由挂载到主应用
 app.include_router(auth.router)
 app.include_router(questions.router)
+app.include_router(answers.router)
 
 
 @app.get("/")
